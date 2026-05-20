@@ -38,11 +38,11 @@ A child profile contains **only the settings that differ** from its parent. The 
 |-------|---------|
 | `"inherits"` | Parent profile name. Empty string = root/standalone. |
 | `"from"` | `"system"` (Elegoo-shipped) or `"User"` (custom) |
-| `"instantiation"` | `"true"` = visible in UI, `"false"` = abstract parent only |
+| `"instantiation"` | System profiles only. `"true"` = visible in UI, `"false"` = abstract parent. User profiles don't use this field. |
 | `"compatible_printers"` | Array of printer variant names this profile works with |
 | `"setting_id"` | Unique ID for system sync |
 | `"is_custom_defined"` | `"0"` = based on system profile, `"1"` = fully custom |
-| `"type"` | `"filament"`, `"process"`, `"machine"`, or `"machine_model"` |
+| `"type"` | Optional. `"filament"`, `"process"`, `"machine"`, or `"machine_model"`. Present in standalone profiles; most override profiles omit it. |
 
 ### Inheritance Chains (Elegoo Centauri Carbon)
 
@@ -60,10 +60,11 @@ fdm_process_common
 #### Filament chain
 
 ```
-fdm_filament_pet
-  └─ Elegoo PETG @base                    [filament_id: EPETGB00]
-       └─ Elegoo PETG PRO @ECC            [system, setting_id: EPETGPROECC]
-            └─ Your User Override          [user, only changed fields]
+fdm_filament_common
+  └─ fdm_filament_pet
+       └─ Elegoo PETG @base               [filament_id: EPETGB00]
+            └─ Elegoo PETG PRO @ECC       [system, setting_id: EPETGPROECC]
+                 └─ Your User Override     [user, only changed fields]
 ```
 
 #### Machine chain
@@ -79,10 +80,10 @@ fdm_machine_common
 When the slicer loads a profile:
 
 1. Read the user profile JSON
-2. Follow `"inherits"` — search `user/` first, then `system/`
+2. Follow `"inherits"` — resolve against available profiles (user overrides can shadow system names)
 3. Recursively resolve parents until `"inherits"` is empty
 4. Merge from root downward — each level overrides parent values
-5. Result: complete profile with all ~300 settings resolved
+5. Result: complete profile with all ~140-150 settings resolved
 
 ## Profile Anatomy
 
@@ -118,11 +119,11 @@ Contains ALL settings — fully self-contained:
     "is_custom_defined": "0",
     "layer_height": "0.16",
     "outer_wall_speed": "50",
-    ... (300+ fields)
+    ... (140+ fields)
 }
 ```
 
-No `.info` file needed. Stored in `base/` subdirectory by convention.
+The slicer creates `.info` files for these too, but with empty `base_id`. Stored in `base/` subdirectory by convention.
 
 ### The `.info` File
 
@@ -139,7 +140,7 @@ updated_time = 1774382284
 | Field | Purpose |
 |-------|---------|
 | `sync_info` | `create` or `update` — sync status |
-| `base_id` | Links to system profile's `setting_id` |
+| `base_id` | Links to the root system ancestor's `setting_id` (not necessarily the immediate parent) |
 | `updated_time` | Unix timestamp of last modification |
 
 ## Naming Conventions
@@ -217,7 +218,7 @@ Use when you want full control with no dependency on system profiles:
 1. Export or copy a fully resolved profile
 2. Set `"inherits": ""`
 3. Place in `user/default/{type}/base/` by convention
-4. No `.info` file needed
+4. The slicer will create an `.info` file with empty `base_id`
 
 ### Machine Override
 
@@ -275,17 +276,18 @@ Some fields use percentage strings: `"15%"`, `"50%"`, `"100%"`.
 
 ### Problem: Settings not taking effect
 
-1. Check the inheritance chain — a parent may override your value
+1. Check the inheritance chain — child values always win over parents, so verify you're editing the correct profile in the chain
 2. Verify `"inherits"` name matches exactly (case-sensitive)
 3. Check `"compatible_printers"` — profile may be filtered out for your printer
 4. Confirm the field name is correct (check system profile for valid keys)
 
 ### Problem: Profile not showing in UI
 
-1. Verify `"instantiation"` is `"true"` (or absent — defaults to true for user profiles)
-2. Check `"compatible_printers"` includes your active printer variant
-3. Verify JSON is valid (no trailing commas, proper quoting)
+1. Check `"compatible_printers"` includes your active printer variant
+2. Verify JSON is valid (no trailing commas, proper quoting)
+3. Check `"name"` matches filename (without `.json`)
 4. Restart the slicer — profiles are cached
+5. For system profiles: check `"instantiation"` is `"true"` (user profiles don't use this field)
 
 ### Problem: Profile shows wrong values
 
@@ -361,7 +363,7 @@ Before using a new profile:
 - [ ] `"{type}_settings_id"` matches `"name"`
 - [ ] `"from"` is set to `"User"`
 - [ ] `.info` file exists (for override profiles)
-- [ ] `.info` `base_id` matches parent's `setting_id`
+- [ ] `.info` `base_id` matches the root system ancestor's `setting_id`
 - [ ] Field names match valid slicer settings
 - [ ] Data format correct (arrays for filament, strings for process)
 - [ ] `"compatible_printers"` is appropriate (or inherited)
@@ -404,8 +406,8 @@ Before using a new profile:
 | `wall_generator` | string | `"classic"` | `classic` or `arachne` |
 | `wall_sequence` | string | `"inner wall/outer wall"` | Print order |
 | `enable_support` | string | `"0"` | Support on/off |
-| `support_type` | string | `"tree(auto)"` | Support style |
-| `print_flow_ratio` | string | `"0.95"` | Global flow multiplier |
+| `support_type` | string | `"normal(auto)"` | Support style |
+| `print_flow_ratio` | string | `"0.97"` | Global flow multiplier |
 
 ## Documentation Reference
 
