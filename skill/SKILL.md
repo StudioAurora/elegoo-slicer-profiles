@@ -13,7 +13,7 @@ ElegooSlicer is based on OrcaSlicer. Both use JSON-based profiles with a prototy
 |----------|---------|
 | `~/Library/Application Support/ElegooSlicer/system/Elegoo/` | System profiles (read-only, updated by slicer) |
 | `~/Library/Application Support/ElegooSlicer/user/default/` | User profiles (your overrides) |
-| `~/Projects/OrcaSlicer.wiki/` | Official documentation |
+| [OrcaSlicer Wiki](https://github.com/SoftFever/OrcaSlicer/wiki) | Official documentation (clone locally for offline use) |
 
 Each location has three subdirectories: `filament/`, `process/`, `machine/`.
 
@@ -411,7 +411,7 @@ Before using a new profile:
 
 ## Documentation Reference
 
-Full OrcaSlicer documentation at `~/Projects/OrcaSlicer.wiki/`:
+Full OrcaSlicer documentation at [github.com/SoftFever/OrcaSlicer/wiki](https://github.com/SoftFever/OrcaSlicer/wiki):
 
 | Path | Content |
 |------|---------|
