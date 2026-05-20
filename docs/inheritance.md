@@ -6,7 +6,7 @@ ElegooSlicer is based on OrcaSlicer and uses the same profile system. This docum
 
 A profile is a JSON file. Each profile can declare a parent via the `"inherits"` field. The child profile only contains **settings that differ** from the parent. The slicer walks the entire chain and merges top-down — the most specific (last) value wins.
 
-This means a user profile with 10 fields actually resolves to 300+ settings when you include everything inherited from its ancestors.
+This means a user profile with 10 fields actually resolves to ~140-150 settings when you include everything inherited from its ancestors.
 
 ## Profile Types
 
@@ -62,7 +62,7 @@ fdm_machine_common                              universal machine defaults
 |-------|---------|
 | `"inherits"` | Parent profile name. Empty = root/standalone |
 | `"from"` | `"system"` or `"User"` |
-| `"instantiation"` | `"true"` = visible in UI, `"false"` = abstract parent only |
+| `"instantiation"` | System profiles only. `"true"` = visible in UI, `"false"` = abstract parent |
 | `"compatible_printers"` | Restricts profile to specific printer variants |
 | `"setting_id"` | Unique ID for sync |
 | `"is_custom_defined"` | `"0"` = based on system, `"1"` = fully custom |
@@ -93,14 +93,14 @@ base_id = PECC04020
 updated_time = 1779200622
 ```
 
-`base_id` links to the system profile's `setting_id`.
+`base_id` links to the root system ancestor's `setting_id` (not necessarily the immediate parent).
 
 ## Resolution Order
 
 When you select a profile:
 
 1. Read the profile JSON
-2. Follow `"inherits"` — search `user/` first, then `system/`
+2. Follow `"inherits"` — resolve against available profiles (user overrides can shadow system names)
 3. Recursively resolve parents until `"inherits"` is empty
 4. Merge from root downward
 5. Result: complete profile with all settings resolved
