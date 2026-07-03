@@ -100,6 +100,22 @@ See [docs/inheritance.md](docs/inheritance.md) for the full explanation.
 
 The tuning here is physical, not slicer-specific. [docs/other-slicers.md](docs/other-slicers.md) maps every change to its equivalent in **Cura**, **PrusaSlicer**, and **Bambu Studio** so you can reproduce these profiles anywhere.
 
+## How These Profiles Were Made
+
+These profiles were built with the help of an AI agent, and since that tends to raise eyebrows, here is exactly what that means and what it does not.
+
+A couple of years ago, using AI meant typing a question and trusting whatever text came back. That is genuinely risky. A large language model only builds text structures, guessing which word follows another. It holds no real wisdom. It returns an aggregate of what it was trained on, and it neither knows nor cares about the meaning of any of it. That is also why I do not use AI for creative work: design should come from human creativity and emotion, and AI has none of that.
+
+There is a more useful way to work with it, and that is as an agent. Agentic AI lets a domain specialist hand off tasks that a computer can do faster or more thoroughly than a person. You run an application on your machine, powered by an AI model, that can read and modify files on your drive and control other programs. If that sounds dangerous, it is, and it is already being used for malicious ends, so it takes care and constant attention. It is also moving quickly in fields like software engineering. Alongside designing and making things, I work as a professional software developer, and I am watching my field change fast.
+
+Here is what I actually did.
+
+First I downloaded the OrcaSlicer wiki, which documents the config files, settings, and how they behave, and had the agent read all of it. Then I pointed it at the existing ElegooSlicer process and filament configs and asked it to work out how they fit together, including the inheritance where one profile only partly overrides another.
+
+Next I asked it to research the specific properties and requirements of printing TPU. It found several sources and reported back what they said. From there I had it turn what it had learned into the relevant TPU settings and write a process config and a filament config. Once it produced the files, I asked it to go back over the whole thing and check for assumptions or invented values. It flagged a few numbers it was not fully confident about and did more research on those.
+
+It gave me a final version and told me to run a test print, which is what these profiles are based on.
+
 ## Compatibility
 
 - **Printer**: Elegoo Centauri Carbon with 0.4mm nozzle
