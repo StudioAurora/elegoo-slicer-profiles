@@ -14,5 +14,10 @@
     "nozzle_temperature_initial_layer": ["230"],
     "nozzle_temperature_range_high": ["240"],
     "nozzle_temperature_range_low": ["210"],
+    "slow_down_layer_time": ["15"],
+    "fan_min_speed": ["30"],
+    "fan_max_speed": ["50"],
+    "overhang_fan_speed": ["100"],
+    "overhang_fan_threshold": ["50%"],
     "version": "1.3.2.9"
 }

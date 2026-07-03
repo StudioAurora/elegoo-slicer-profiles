@@ -39,6 +39,40 @@ fdm_process_common                              universal FDM defaults
                  └── Your User Profile          user: only your changed settings
 ```
 
+> Note that every user profile hangs **directly** off a system preset. That is not just a convention — it is a hard requirement of the loader (see below).
+
+## Critical Constraint: user profiles must inherit a system preset
+
+ElegooSlicer resolves only **one hop** of *user* inheritance. A user profile is loaded — and shown in the UI dropdown — only when its `inherits` points at either:
+
+- a **system preset**, or
+- a **standalone user root** (`inherits: ""`).
+
+If a user profile's `inherits` points at **another user profile that itself still inherits further**, the slicer **silently drops it**. There is no error and no warning; the profile simply never appears in the dropdown.
+
+```
+0.20mm Standard @Elegoo CC   (system)
+  └── 0.20mm TPU  (user)          ✅ loads   — inherits a system preset
+       └── 0.16mm TPU  (user)     ❌ hidden  — inherits a user delta that still inherits
+```
+
+**What does *not* fix it:** adding an explicit `compatible_printers` list. That was the first hypothesis and it made no difference.
+
+**The fix:** *flatten*. Rewrite the hidden profile so its `inherits` points straight at the system preset, and merge every inherited delta value into the file itself.
+
+```
+0.20mm Standard @Elegoo CC   (system)
+  ├── 0.20mm TPU  (user)      ✅
+  └── 0.16mm TPU  (user)      ✅  now inherits the SYSTEM preset, with 0.20mm TPU's
+                                  deltas copied in verbatim
+```
+
+**Trade-off:** the profiles are now self-contained. Editing `0.20mm TPU` no longer propagates to `0.16mm TPU` or the Support variants — the shared settings must be kept in sync by hand.
+
+### How to check whether a profile even loaded
+
+If a profile is missing from the dropdown, tabulate every user profile's `inherits` value against what *is* visible. In practice the visible ones all inherit a system preset (or a standalone root); the hidden ones all inherit a still-inheriting user delta. That pattern is the tell.
+
 ### Filament
 
 ```

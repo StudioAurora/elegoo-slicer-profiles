@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# ElegooSlicer / OrcaSlicer output & cache (not profile sources)
+*.gcode
+*.gcode.3mf
+*.3mf
+!profiles/**/*.3mf
+cache/
+log/
+*.log
