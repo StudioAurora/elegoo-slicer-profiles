@@ -4,7 +4,7 @@ ElegooSlicer is based on OrcaSlicer and uses the same profile system. This docum
 
 ## Core Concept: Delta Override
 
-A profile is a JSON file. Each profile can declare a parent via the `"inherits"` field. The child profile only contains **settings that differ** from the parent. The slicer walks the entire chain and merges top-down — the most specific (last) value wins.
+A profile is a JSON file. Each profile can declare a parent via the `"inherits"` field. The child profile only contains **settings that differ** from the parent. The slicer walks the entire chain and merges top-down, and the most specific (last) value wins.
 
 This means a user profile with 10 fields actually resolves to ~140-150 settings when you include everything inherited from its ancestors.
 
@@ -12,7 +12,7 @@ This means a user profile with 10 fields actually resolves to ~140-150 settings 
 
 | Type | ID Field | Directory | Example |
 |------|----------|-----------|---------|
-| `machine_model` | — | `machine/` | Printer hardware definition |
+| `machine_model` | n/a | `machine/` | Printer hardware definition |
 | `machine` | `printer_settings_id` | `machine/` | Printer variant (specific nozzle) |
 | `filament` | `filament_settings_id` | `filament/` | Material settings |
 | `process` | `print_settings_id` | `process/` | Print quality and speed settings |
@@ -39,11 +39,11 @@ fdm_process_common                              universal FDM defaults
                  └── Your User Profile          user: only your changed settings
 ```
 
-> Note that every user profile hangs **directly** off a system preset. That is not just a convention — it is a hard requirement of the loader (see below).
+> Every user profile hangs directly off a system preset. The loader depends on this, as explained below.
 
 ## Critical Constraint: user profiles must inherit a system preset
 
-ElegooSlicer resolves only **one hop** of *user* inheritance. A user profile is loaded — and shown in the UI dropdown — only when its `inherits` points at either:
+ElegooSlicer resolves only **one hop** of *user* inheritance. A user profile is loaded, and shown in the UI dropdown, only when its `inherits` points at either:
 
 - a **system preset**, or
 - a **standalone user root** (`inherits: ""`).
@@ -52,22 +52,22 @@ If a user profile's `inherits` points at **another user profile that itself stil
 
 ```
 0.20mm Standard @Elegoo CC   (system)
-  └── 0.20mm TPU  (user)          ✅ loads   — inherits a system preset
-       └── 0.16mm TPU  (user)     ❌ hidden  — inherits a user delta that still inherits
+  └── 0.20mm TPU  (user)          loads    (inherits a system preset)
+       └── 0.16mm TPU  (user)     hidden   (inherits a user delta that still inherits)
 ```
 
-**What does *not* fix it:** adding an explicit `compatible_printers` list. That was the first hypothesis and it made no difference.
+Adding an explicit `compatible_printers` list does not fix it. That was the first hypothesis, and it made no difference.
 
-**The fix:** *flatten*. Rewrite the hidden profile so its `inherits` points straight at the system preset, and merge every inherited delta value into the file itself.
+To fix it, flatten the profile. Rewrite the hidden profile so its `inherits` points straight at the system preset, and merge every inherited delta value into the file itself.
 
 ```
 0.20mm Standard @Elegoo CC   (system)
-  ├── 0.20mm TPU  (user)      ✅
-  └── 0.16mm TPU  (user)      ✅  now inherits the SYSTEM preset, with 0.20mm TPU's
-                                  deltas copied in verbatim
+  ├── 0.20mm TPU  (user)      loads
+  └── 0.16mm TPU  (user)      loads, now inherits the SYSTEM preset, with 0.20mm TPU's
+                              deltas copied in verbatim
 ```
 
-**Trade-off:** the profiles are now self-contained. Editing `0.20mm TPU` no longer propagates to `0.16mm TPU` or the Support variants — the shared settings must be kept in sync by hand.
+The cost is that the profiles are now self-contained. Editing `0.20mm TPU` no longer propagates to `0.16mm TPU` or the Support variants, so the shared settings have to be kept in sync by hand.
 
 ### How to check whether a profile even loaded
 
@@ -134,7 +134,7 @@ updated_time = 1779200622
 When you select a profile:
 
 1. Read the profile JSON
-2. Follow `"inherits"` — resolve against available profiles (user overrides can shadow system names)
+2. Follow `"inherits"` and resolve against available profiles (user overrides can shadow system names)
 3. Recursively resolve parents until `"inherits"` is empty
 4. Merge from root downward
 5. Result: complete profile with all settings resolved

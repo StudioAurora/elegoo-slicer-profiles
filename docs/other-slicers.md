@@ -1,39 +1,39 @@
-# Porting the TPU Tuning to Other Slicers
+# Porting the TPU tuning to other slicers
 
-The profiles in this repo are ElegooSlicer/OrcaSlicer JSON files. But the **tuning is not slicer-specific** — it's a set of physical values that any slicer can apply. This document lists every meaningful change as a slicer-agnostic setting, with the equivalent name in **Cura**, **PrusaSlicer**, and **Bambu Studio**, so you can reproduce these profiles anywhere.
+The profiles in this repo are ElegooSlicer/OrcaSlicer JSON files, but the tuning itself has nothing to do with the slicer. It is a set of physical values, and any slicer can apply them. This page lists each change as a plain setting, with the equivalent name in Cura, PrusaSlicer, and Bambu Studio, so you can rebuild these profiles elsewhere.
 
-> **Bambu Studio / OrcaSlicer** share almost all setting names with this repo — porting there is nearly 1:1. **Cura** and **PrusaSlicer** use different names and are the focus of the mapping tables below.
+Bambu Studio and OrcaSlicer use almost the same setting names as this repo, so porting there is close to a straight copy. Cura and PrusaSlicer name things differently, and those are what the tables below focus on.
 
-Values shown are for **Tinmorry TPU 95A on a 0.4 mm nozzle**. Treat them as a validated starting point, not gospel — every printer/filament combo needs a tweak or two.
+The numbers are for Tinmorry TPU 95A on a 0.4 mm nozzle. They are a tested starting point, not a fixed rule. Every printer and filament combination needs a tweak or two.
 
 ---
 
-## 1. The four settings that matter most
+## The four settings that matter most
 
-If you only copy four things, copy these. They are the difference between "TPU prints" and "TPU jams / under-extrudes."
+If you copy nothing else, copy these four. They are the difference between a TPU print that works and one that jams or under-extrudes.
 
 | Setting | Value | Why |
 |---------|-------|-----|
-| **Print speed (walls)** | 20–35 mm/s | Flexible filament buckles in the extruder at PLA speeds → under-extrusion. This is the #1 factor. |
-| **Max volumetric flow** | 3.2 mm³/s | Hard ceiling on how fast TPU can physically be pushed; caps every other speed automatically. |
-| **Retraction distance** | 0.8 mm (direct drive) | Long retraction stretches the elastic filament and causes jams/gaps. Keep it short. |
-| **Cooling** | Low base fan, boost on overhangs | Blanket 100 % fan ruins TPU layer/Z bonding. Low base, high only where overhangs need it. |
+| Print speed (walls) | 20-35 mm/s | Flexible filament buckles in the extruder at PLA speeds and starts under-extruding. This is the single biggest factor. |
+| Max volumetric flow | 3.2 mm³/s | A hard ceiling on how fast TPU can physically move through the nozzle. It caps every other speed for you. |
+| Retraction distance | 0.8 mm (direct drive) | Long retraction stretches the elastic filament and causes jams and gaps. Keep it short. |
+| Cooling | Low base fan, boost on overhangs | A flat 100 % fan wrecks TPU layer and Z bonding. Run the base low and only spike it where overhangs need it. |
 
-And the zeroth rule, before any setting: **dry your filament.** TPU is hygroscopic; wet TPU produces regular directional gaps in the first layer regardless of the profile.
+And the rule that comes before any setting: dry your filament. TPU pulls water out of the air. Wet TPU leaves regular, directional gaps in the first layer no matter how good the profile is.
 
 ---
 
-## 2. Temperature
+## Temperature
 
 | Setting | This repo | Cura | PrusaSlicer | Notes |
 |---------|-----------|------|-------------|-------|
-| Nozzle temp | 225 °C | Printing Temperature | Nozzle → Other layers | Range 210–240 °C |
-| First-layer nozzle | 230 °C | Printing Temperature Initial Layer | Nozzle → First layer | Slightly hotter for adhesion |
-| Bed temp | 35 °C | Build Plate Temperature | Bed → Other layers | TPU self-adheres; hot bed = gooey/warped first layer |
+| Nozzle temp | 225 °C | Printing Temperature | Nozzle, other layers | Range 210-240 °C |
+| First-layer nozzle | 230 °C | Printing Temperature Initial Layer | Nozzle, first layer | A little hotter to help it stick |
+| Bed temp | 35 °C | Build Plate Temperature | Bed, other layers | TPU sticks to itself; a hot bed makes the first layer gooey and warped |
 
 ---
 
-## 3. Speed
+## Speed
 
 | Setting | This repo | Cura | PrusaSlicer |
 |---------|-----------|------|-------------|
@@ -41,18 +41,18 @@ And the zeroth rule, before any setting: **dry your filament.** TPU is hygroscop
 | Inner wall | 35 mm/s | Inner Wall Speed | Perimeters |
 | Sparse infill | 40 mm/s | Infill Speed | Infill |
 | Solid/top infill | 40 / 25 mm/s | Top/Bottom Speed | Solid / Top solid infill |
-| Bridges | 15 mm/s | — (see Bridge settings) | Bridges |
+| Bridges | 15 mm/s | Bridge settings | Bridges |
 | First layer | 15 mm/s | Initial Layer Speed | First layer speed |
 | Travel | 150 mm/s | Travel Speed | Travel |
-| Gap fill | 25 mm/s | — | Gap fill |
+| Gap fill | 25 mm/s | n/a | Gap fill |
 
-**Max volumetric flow** (the real limiter): Cura = *Maximum Flow (Flow rate)* via the *Flow Rate Max* / plugin or material setting; PrusaSlicer = *Advanced → Max volumetric speed* (per-filament). Set to **3.2 mm³/s**.
+The real limiter is max volumetric flow. In Cura it sits under the material settings (Maximum Flow); in PrusaSlicer it is under Advanced, Max volumetric speed, set per filament. Put it at 3.2 mm³/s and it quietly caps everything else.
 
 ---
 
-## 4. Acceleration
+## Acceleration
 
-Lower acceleration keeps flow steady and reduces ringing on flexible parts.
+Lower acceleration keeps the flow steady and cuts ringing on flexible parts.
 
 | Setting | This repo | Cura | PrusaSlicer |
 |---------|-----------|------|-------------|
@@ -62,7 +62,7 @@ Lower acceleration keeps flow steady and reduces ringing on flexible parts.
 
 ---
 
-## 5. Retraction & Z-hop (filament-level)
+## Retraction and Z-hop (filament level)
 
 | Setting | This repo | Cura | PrusaSlicer |
 |---------|-----------|------|-------------|
@@ -72,76 +72,76 @@ Lower acceleration keeps flow steady and reduces ringing on flexible parts.
 | Z-hop | 0.3 mm | Z Hop When Retracted | Lift Z |
 | Z-hop style | Normal lift | Z Hop (standard) | Lift Z |
 
-> Values are for a **direct-drive** extruder. On a Bowden setup, retraction distance will be considerably larger (3–6 mm) — direct-drive numbers do not transfer.
+These numbers assume a direct-drive extruder. On a Bowden setup the retraction distance is much larger, usually 3 to 6 mm, so the direct-drive value does not carry over.
 
 ---
 
-## 6. Cooling (the nuance most guides get wrong)
+## Cooling
 
-Don't just set fan to 100 %. Split it:
+Setting the fan to a flat 100 % is the common mistake. Split it instead.
 
 | Setting | This repo | Cura | PrusaSlicer |
 |---------|-----------|------|-------------|
 | Base fan (min) | 30 % | Fan Speed (Minimum) | Min fan speed |
 | Base fan (max) | 50 % | Fan Speed (Maximum) | Max fan speed |
 | Overhang fan boost | 100 % | Fan Speed Override / Overhang | Bridging fan speed (closest) |
-| Overhang threshold | 50 % overhang | Fan overhang settings | — |
+| Overhang threshold | 50 % overhang | Fan overhang settings | n/a |
 | Min layer time | 15 s | Minimum Layer Time | Slow down if layer time below |
 
-Rationale: high fan improves overhang crispness but **weakens interlayer/Z bonding** on TPU. Keep the base low for strength, boost only on overhangs.
+A high fan makes overhangs crisper but weakens the layer and Z bonding on TPU. Keep the base low for strength and only push it up on overhangs.
 
 ---
 
-## 7. Walls, infill & first-layer reliability
+## Walls, infill, and first-layer reliability
 
 | Setting | This repo | Cura | PrusaSlicer |
 |---------|-----------|------|-------------|
 | Wall count | 3 | Wall Line Count | Perimeters |
-| Infill pattern | Gyroid | Infill Pattern → Gyroid | Fill pattern → Gyroid |
+| Infill pattern | Gyroid | Infill Pattern, Gyroid | Fill pattern, Gyroid |
 | Bridge flow | 0.95 | Bridge Flow | Bridge flow ratio |
 | Brim width | 8 mm | Brim Width | Brim width |
 | Elephant-foot comp. | 0.05 mm | Initial Layer Horizontal Expansion (negative) | Elephant foot compensation |
 
 ---
 
-## 8. Overhang handling
+## Overhang handling
 
-OrcaSlicer/Bambu have graduated per-overhang speed controls and overhang-reverse that Cura/PrusaSlicer don't expose directly. Approximate them:
+OrcaSlicer and Bambu have per-overhang speed steps and an overhang-reverse option that Cura and PrusaSlicer do not expose directly. You can get close.
 
-| This repo | What it does | Cura equivalent | PrusaSlicer equivalent |
-|-----------|--------------|-----------------|------------------------|
-| Overhang speeds 20 → 15 → 8 mm/s | Slows steeper overhangs progressively | Cura 5.x *Overhanging Wall Speed* (single value, use ~15) | *Overhangs → speed* (single value) |
+| This repo | What it does | Cura | PrusaSlicer |
+|-----------|--------------|------|-------------|
+| Overhang speeds 20, 15, 8 mm/s | Slows steeper overhangs progressively | Cura 5.x Overhanging Wall Speed (single value, use about 15) | Overhangs speed (single value) |
 | Extra perimeters on overhangs | Adds walls under overhangs for support | Extra Skin Wall Count (partial) | Extra perimeters if needed |
-| Overhang reverse | Alternates direction to fight curling | — (not available) | — (not available) |
+| Overhang reverse | Alternates direction to fight curling | not available | not available |
 
-If your slicer lacks graduated overhang control, set a single conservative overhang wall speed of ~12–15 mm/s.
+If your slicer has no graduated overhang control, set one conservative overhang wall speed of about 12 to 15 mm/s.
 
 ---
 
-## 9. Support (for the "Support" variants)
+## Support (for the Support variants)
 
-TPU fuses to TPU, so the whole game is a **generous gap + thin interface** for clean removal.
+TPU welds to TPU, so the whole thing comes down to a generous gap and a thin interface so the support peels off.
 
 | Setting | This repo | Cura | PrusaSlicer |
 |---------|-----------|------|-------------|
-| Support style | Snug | Support Placement → Everywhere + Tree/Normal | Snug / Support on build plate only = off |
-| Z gap (top & bottom) | 0.2 mm (≈1 layer) | Support Z Distance | Contact Z distance |
-| Interface layers | 1 top / 0 bottom | Support Interface (Enable, thin) | Interface layers |
+| Support style | Snug | Support Placement, Everywhere + Tree/Normal | Snug / Support on build plate only = off |
+| Z gap (top and bottom) | 0.2 mm (about 1 layer) | Support Z Distance | Contact Z distance |
+| Interface layers | 1 top / 0 bottom | Support Interface (enable, thin) | Interface layers |
 | Interface spacing | 0.5 mm | Support Interface Line Distance (wide) | Interface pattern spacing |
 | Support base spacing | 3 mm | Support Density (low) | Support spacing |
 | XY distance | 0.35 mm | Support X/Y Distance | XY separation |
-| Support on build plate only | **Off** | Support Placement → Everywhere | Uncheck "on build plate only" |
+| Support on build plate only | Off | Support Placement, Everywhere | Uncheck "on build plate only" |
 | Support/interface speed | 35 / 25 mm/s | Support Speed | Support speed |
 
-> **Key for recesses/cavities:** *support on build plate only* must be **off**, otherwise a pocket that needs support from the model itself gets none.
+For recesses and cavities, turn "support on build plate only" off. Otherwise a pocket that needs support from the model itself gets none.
 
 ---
 
-## Quick sanity checklist when porting
+## Quick sanity check when porting
 
-1. Walls at 20–35 mm/s? ✔
-2. Max volumetric flow capped at ~3.2 mm³/s? ✔
-3. Retraction short (≤1 mm on direct drive)? ✔
-4. Base fan low, overhang boost high — not blanket 100 %? ✔
-5. Bed not too hot (≤40 °C)? ✔
-6. Filament actually dried? ✔ (the one that bites everyone)
+1. Walls at 20-35 mm/s?
+2. Max volumetric flow capped around 3.2 mm³/s?
+3. Retraction short, under about 1 mm on direct drive?
+4. Base fan low with an overhang boost, not a flat 100 %?
+5. Bed no hotter than about 40 °C?
+6. Filament actually dried? (the one everyone forgets)
